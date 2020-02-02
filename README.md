@@ -1,6 +1,12 @@
 # Spotify-listening-bot
 A Python-written bot that can generate automatic listens to your last 50 added Songs.
 
+## Requirements
+
+* Python 3 (Python 2.7 not supported)
+* [https://github.com/plamere/spotipy](spotipy) Library
+* Spotify Developer API Credentials
+
 ## Usage
 * First, clone this repo on your local machine with\
 ```git clone https://github.com/ThePrinoob/Spotipy-listening-bot```\
@@ -8,6 +14,8 @@ or Download the ZIP from here.
 
 * Next you will need the spotipy Library, install it with this command:\
 ```pip install spotipy```
+or
+```pip3 install spotipy```
 
 * Done! You can now simply run the bot with\
 ```python spotifyListeningBot.py [options]```
