@@ -75,29 +75,50 @@ class Main:
                 print("aight im silent now but still doing my thing")
                 sys.stdout = open(os.devnull, 'w')
 
-    def checkPlayback(self):
-        tracks = []
+    def checkPlayback(self, timeChecking = 0):
         print("\ngetting current Playback...")
         pb = self.sp.current_playback()  # info to the current playback
-        print("getting user saved tracks...")
-        savedTracks = self.sp.current_user_saved_tracks(50)  # saved tracks
-        for tracks_uri in savedTracks.get("items"):
-            tracks.append(tracks_uri.get("track").get("uri"))
-        # Randomizes the Tracks
-        print("randomizing Tracks...")
-        random.shuffle(tracks)
+        
+        if timeChecking == 0:
+            print("checking if Spotify is playing...")
+            if pb == None or pb["is_playing"] == False:
+                print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
+                timeChecking = 5
+                time.sleep(5)
+                main.checkPlayback(timeChecking)
+                print("-------------------------")
+            else:
+                print("Already Playing...")
+            print("checking again in 5 Minutes")
 
-        print("checking if Spotify is playing...")
-        if pb == None or pb["is_playing"] == False:
-            print("Not Playing...")
+        elif timeChecking <= 300:
+            print("checking if Spotify is still not playing...")
+            if pb == None or pb["is_playing"] == False:
+                print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
+                timeChecking += 5
+                time.sleep(5)
+                main.checkPlayback(timeChecking)
+                print("-------------------------")
+            else:
+                main.checkPlayback()
+                print("-------------------------")
+
+        else:
+            print("didn't play for 5 Minutes...")
+            tracks = []
+            print("getting user saved tracks...")
+            savedTracks = self.sp.current_user_saved_tracks(50)  # saved tracks
+            for tracks_uri in savedTracks.get("items"):
+                tracks.append(tracks_uri.get("track").get("uri"))
+            # Randomizes the Tracks
+            print("randomizing Tracks...")
+            random.shuffle(tracks)
             # starts the Playback on raspbify
             print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")))
             self.sp.start_playback(
                 self.device_id, None, tracks)
-        else:
-            print("Already Playing...")
-        print("checking again in 5 Minutes")
         print("-------------------------")
+        
 
 
 print(r"""
@@ -116,23 +137,59 @@ def getCredentials():
 
     if "SPOTIPY_CLIENT_ID" in os.environ:
         print("Got your Client_ID from Environment Variables")
-        client_id = os.environ.get('SPOTIPY_CLIENT_ID')
+        
+        while True:
+            environ = input("Do you want to use these Infos? (yes / no) ")
+            if environ.lower() in ('yes', 'ye', 'y', 'j'):
+                client_id = os.environ.get('SPOTIPY_CLIENT_ID')
+                print("using these Values!\n")
+                break
+            elif environ.lower() in ('no', 'na', 'n'):
+                client_id = input("Not Using those Values... Specify SPOTIPY_CLIENT_ID now: ")
+                print("using user specific values!\n")
+                break
+            else:
+                print("Not an appropriate answer. Try Again\n")
     else:
         client_id = input("Couldn't find SPOTIPY_CLIENT_ID in Environment Variables... Specify SPOTIPY_CLIENT_ID now: ")
 
     if "SPOTIPY_CLIENT_SECRET" in os.environ:
         print("Got your SPOTIPY_CLIENT_SECRET from Environment Variables")
-        client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
+
+        while True:
+            environ = input("Do you want to use these Infos? (yes / no) ")
+            if environ.lower() in ('yes', 'ye', 'y', 'j'):
+                client_secret = os.environ.get('SPOTIPY_CLIENT_SECRET')
+                print("using these Values!\n")
+                break
+            elif environ.lower() in ('no', 'na', 'n'):
+                client_secret = input("Not Using those Values... Specify SPOTIPY_CLIENT_SECRET now: ")
+                print("using user specific values!\n")
+                break
+            else:
+                print("Not an appropriate answer. Try Again\n")
     else:
         client_secret = input("Couldn't find SPOTIPY_CLIENT_SECRET in Environment Variables... Specify SPOTIPY_CLIENT_SECRET now: ")
 
     if "SPOTIPY_REDIRECT_URI" in os.environ:
         print("Got your SPOTIPY_REDIRECT_URI from Environment Variables")
-        redirect_uri = os.environ.get('SPOTIPY_REDIRECT_URI')
+        while True:
+            environ = input("Do you want to use these Infos? (yes / no) ")
+            if environ.lower() in ('yes', 'ye', 'y', 'j'):
+                redirect_uri = os.environ.get('SPOTIPY_REDIRECT_URI')
+                print("using these Values!\n")
+                break
+            elif environ.lower() in ('no', 'na', 'n'):
+                redirect_uri = input("Not Using those Values... Specify SPOTIPY_REDIRECT_URI now: ")
+                print("using user specific values!\n")
+                break
+            else:
+                print("Not an appropriate answer. Try Again\n")
     else:
         redirect_uri = input("Couldn't find SPOTIPY_REDIRECT_URI in Environment Variables... Specify SPOTIPY_REDIRECT_URI now: ")
 
     if "-c" in sys.argv or "--cache" in sys.argv:
+        print("saving Credentials to ./cache ...")
         credentials = {
             "username": username,
             "client_id": client_id, 

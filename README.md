@@ -41,6 +41,9 @@ or run the Script and it will automatically ask for your Credentials
 
 or run the Script and it will automatically ask for your Credentials
 
+### How I use it
+I use this Bot in combination with Raspotify on my Raspberry Pi. It allows your Rasperry Pi to be a Spotify Connect Device so the Music is played on a Device which no one hears or uses directly. [Here](https://pimylifeup.com/raspberry-pi-spotify/) is a Link on how you can configure it.
+
 ## Run options
 These are optionals parameters, they are not necessary to run the program.
 
