@@ -84,25 +84,25 @@ class Main:
             if pb == None or pb["is_playing"] == False:
                 print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
                 timeChecking = 5
+                print("-------------------------")
                 time.sleep(5)
                 main.checkPlayback(timeChecking)
-                print("-------------------------")
             else:
                 print("Already Playing...")
             print("checking again in 5 Minutes")
+            print("-------------------------")
 
         elif timeChecking <= 300:
             print("checking if Spotify is still not playing...")
             if pb == None or pb["is_playing"] == False:
                 print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
                 timeChecking += 5
+                print("-------------------------")
                 time.sleep(5)
                 main.checkPlayback(timeChecking)
-                print("-------------------------")
             else:
-                main.checkPlayback()
-                print("-------------------------")
-
+                print("Plays again! Going back to normal Rythmus.")
+                
         else:
             print("didn't play for 5 Minutes...")
             tracks = []
@@ -117,7 +117,7 @@ class Main:
             print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")))
             self.sp.start_playback(
                 self.device_id, None, tracks)
-        print("-------------------------")
+            print("-------------------------")
         
 
 
