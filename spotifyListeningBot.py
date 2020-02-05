@@ -225,8 +225,16 @@ except IOError:
     getCredentials()
 
 main = Main()
-main.refresh_token()
-main.getDevice()
+
+def init():    
+    try:
+        main.refresh_token()
+        main.getDevice()
+    except OSError:
+        print("No Internet Connection!")
+        time.sleep(5)
+        init()
+init()
 
 try:
     while True:
@@ -236,6 +244,10 @@ try:
         except spotipy.client.SpotifyException:
             print("redefining Token")
             main.refresh_token()
+        except (OSError, ConnectionError): 
+            print("No Internet Connection!")
+            time.sleep(5)
+            pass
 except KeyboardInterrupt:
     sys.stdout = sys.__stdout__
     print('Manual break by user')
