@@ -4,7 +4,7 @@ A Python-written bot that can generate automatic listens to your last 50 added S
 ## Requirements
 
 * Python 3 (Python 2.7 not supported)
-* [https://github.com/plamere/spotipy](spotipy) Library
+* [Spotipy](https://github.com/plamere/spotipy) Library
 * Spotify Developer API Credentials
 
 ## Usage
