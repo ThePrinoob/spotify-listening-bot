@@ -1,5 +1,5 @@
 # Spotify-listening-bot
-A Python-written bot that can generate automatic listens to your last 50 added Songs.
+A Python-written bot that can generate automatic listens to your desired Playlist or liked Songs.
 
 ## Requirements
 
