@@ -16,9 +16,10 @@ client_secret = None
 redirect_uri = None
 device_id = None
 devices = None
+playlist = None
 device = 0
-waitTime = 300
 waitTimePlaying = 5
+waitTime = 300
 _auth_finder = re.compile("code=(.*?)$", re.MULTILINE)
 cacheCredentials = ".cache/.cachedCredentials"
 
@@ -109,20 +110,39 @@ class Main:
                 
         else:
             print("didn't play for " + str(waitTime) + " seconds...")
-            tracks = []
-            print("getting user saved tracks...")
-            savedTracks = self.sp.current_user_saved_tracks(50)  # saved tracks
-            for tracks_uri in savedTracks.get("items"):
-                tracks.append(tracks_uri.get("track").get("uri"))
-            # Randomizes the Tracks
-            print("randomizing Tracks...")
-            random.shuffle(tracks)
-            # starts the Playback on raspbify
-            print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")))
-            self.sp.start_playback(
-                self.device_id, None, tracks)
+            def playSavedTracks(self):
+                print("getting user saved tracks...")
+                totalTracks = self.sp.current_user_saved_tracks()["total"]
+                tracks = []
+                if(totalTracks <= 50):
+                    self.playlist = self.sp.current_user_saved_tracks(totalTracks)  # saved tracks
+                else:
+                    self.playlist = self.sp.current_user_saved_tracks(50)  # saved tracks
+                for tracks_uri in self.playlist.get("items"):
+                    tracks.append(tracks_uri.get("track").get("uri"))
+                # Randomizes the Tracks
+                print("randomizing Tracks...")
+                random.shuffle(tracks)
+                # starts the Playback on raspbify
+                print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")) + " with users saved Tracks")
+                self.sp.start_playback(
+                    self.device_id, None, tracks)
+            try:
+                if playlist:
+                    # starts the Playback on raspbify with Playlist from Paramater
+                    print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")) + " with Playlist called", self.sp.playlist(playlist, "name")["name"])
+                    self.sp.start_playback(
+                        self.device_id, playlist)
+                    self.sp.shuffle(True)
+                    self.sp.next_track()
+                else:
+                    playSavedTracks(self)
+            except spotipy.SpotifyException as e:
+                if e.http_status == 404:
+                    print("Error: Playlist not found! Using standart settings")
+                    playSavedTracks(self)
             print("\n-------------------------\n")
-        
+
 
 
 print(r"""
@@ -242,6 +262,8 @@ try:
             print("Thats not a number! Using Basic Value for waitTimePlaying")
         else:
             waitTimePlaying = int(parameter_dict["waitTimePlaying"])
+    if "playlist" in parameter_dict:
+        playlist = parameter_dict["playlist"]
 except IOError:
     username = input("Type your Spotify Username: ")
     getCredentials()
@@ -266,9 +288,14 @@ try:
         try:
             main.checkPlayback()
             time.sleep(waitTime)  # 300 for 5 minutes
-        except spotipy.client.SpotifyException:
-            print("redefining Token")
-            main.refresh_token()
+        except spotipy.client.SpotifyException as e:
+            if e.http_status == 401:
+                print("Token expired. Redefining Token...")
+                main.refresh_token()
+            else:
+                print(e)
+                print("Please send this error message to the Developer!")
+                sys.exit()
         except (OSError, ConnectionError): 
             print("No Internet Connection!")
             time.sleep(5)
