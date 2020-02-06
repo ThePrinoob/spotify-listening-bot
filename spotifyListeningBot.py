@@ -17,6 +17,8 @@ redirect_uri = None
 device_id = None
 devices = None
 device = 0
+waitTime = 300
+waitTimePlaying = 5
 _auth_finder = re.compile("code=(.*?)$", re.MULTILINE)
 cacheCredentials = ".cache/.cachedCredentials"
 
@@ -56,11 +58,13 @@ class Main:
         if self.devices == None:
             print("Spotify couldn't find any devices :(\nExiting now...")
             sys.exit()
+        print("-------------------------\n")
         print("available Devices:")
         for i in range(len(self.devices.get("devices"))):
             print("Nr: " + str(i))
             print("Name: " + self.devices.get("devices")[i].get("name"))
             print("ID: " + self.devices.get("devices")[i].get("id") + "\n")
+        print("-------------------------\n")
         self.device = input(
             "On which Device would you like to stream, when nothing is playing?\nNr: ")
         if self.device.isdigit() == False:
@@ -82,29 +86,29 @@ class Main:
         if timeChecking == 0:
             print("checking if Spotify is playing...")
             if pb == None or pb["is_playing"] == False:
-                print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
-                timeChecking = 5
-                print("-------------------------")
-                time.sleep(5)
+                print("Not Playing...\nChecking Every " + str(waitTimePlaying) + " Seconds for " + str(waitTime) + " Seconds if its still not playing")
+                timeChecking = waitTimePlaying
+                print("\n-------------------------")
+                time.sleep(waitTimePlaying)
                 main.checkPlayback(timeChecking)
             else:
                 print("Already Playing...")
-            print("checking again in 5 Minutes")
-            print("-------------------------")
+            print("checking again in " + str(waitTime) + " seconds")
+            print("\n-------------------------")
 
-        elif timeChecking <= 300:
+        elif timeChecking <= waitTime:
             print("checking if Spotify is still not playing...")
             if pb == None or pb["is_playing"] == False:
-                print("Not Playing...\nChecking Every 5 Seconds for 5 Minutes if its still not playing")
-                timeChecking += 5
-                print("-------------------------")
-                time.sleep(5)
+                print("Not Playing... Checking again in " + str(waitTimePlaying) +  " seconds")
+                timeChecking += waitTimePlaying
+                print("\n-------------------------")
+                time.sleep(waitTimePlaying)
                 main.checkPlayback(timeChecking)
             else:
                 print("Plays again! Going back to normal Rythmus.")
                 
         else:
-            print("didn't play for 5 Minutes...")
+            print("didn't play for " + str(waitTime) + " seconds...")
             tracks = []
             print("getting user saved tracks...")
             savedTracks = self.sp.current_user_saved_tracks(50)  # saved tracks
@@ -117,7 +121,7 @@ class Main:
             print("starting Playback on " + str(self.devices.get("devices")[int(self.device)].get("name")))
             self.sp.start_playback(
                 self.device_id, None, tracks)
-            print("-------------------------")
+            print("\n-------------------------\n")
         
 
 
@@ -220,6 +224,24 @@ try:
     else:
         username = input("Type your Spotify Username: ")
         getCredentials()
+
+    parameter_dict = {}
+    for user_input in sys.argv[1:]:
+        if "=" not in user_input:
+            continue
+        varname = user_input.split("=")[0]
+        varvalue = user_input.split("=")[1]
+        parameter_dict[varname] = varvalue
+    if "waitTime" in parameter_dict:
+        if parameter_dict["waitTime"].isdigit() == False:
+            print("Thats not a number! Using Basic Value for waitTime")
+        else:
+            waitTime = int(parameter_dict["waitTime"])
+    if "waitTimePlaying" in parameter_dict:
+        if parameter_dict["waitTimePlaying"].isdigit() == False:
+            print("Thats not a number! Using Basic Value for waitTimePlaying")
+        else:
+            waitTimePlaying = int(parameter_dict["waitTimePlaying"])
 except IOError:
     username = input("Type your Spotify Username: ")
     getCredentials()
@@ -234,13 +256,16 @@ def init():
         print("No Internet Connection!")
         time.sleep(5)
         init()
+    except KeyboardInterrupt:
+        print('\nManual break by user! exiting')
+        sys.exit()
 init()
 
 try:
     while True:
         try:
             main.checkPlayback()
-            time.sleep(300)  # 300 for 5 minutes
+            time.sleep(waitTime)  # 300 for 5 minutes
         except spotipy.client.SpotifyException:
             print("redefining Token")
             main.refresh_token()
@@ -250,4 +275,4 @@ try:
             pass
 except KeyboardInterrupt:
     sys.stdout = sys.__stdout__
-    print('Manual break by user')
+    print('Manual break by user! exiting')

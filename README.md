@@ -49,6 +49,8 @@ These are optionals parameters, they are not necessary to run the program.
 
 * ```-s``` or ```--silent``` puts the Script in silent mode, that means no Output :(
 * ```-c``` or ```--cache``` puts the Script in cache mode, that means your Credential will be saved to the .cache Folder in the current Folder.
+* ```waitTime=``` if you put a number (e.g. 60) the Script will check every 60 Seconds if the playback is stopped.
+* ```waitTimePlayback=``` if you put a number (e.g. 5) the Script will check every 5 Seconds if the playback was started again and it would go back to the normal rhythm (e.g. 60). 
 
 ## License
 
